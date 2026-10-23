@@ -1,10 +1,11 @@
+import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute';
 import DashboardLayout from './components/DashboardLayout';
 
 // Placeholder dashboards
-const SuperAdminDashboard = () => <div><h1 className="text-3xl font-bold text-gray-800">Super Admin Dashboard</h1><p className="mt-2 text-gray-600">City-wide overview coming here.</p></div>;
+
 const DeptAdminDashboard = () => <div><h1 className="text-3xl font-bold text-gray-800">Dept Admin Dashboard</h1><p className="mt-2 text-gray-600">Department tasks coming here.</p></div>;
 const FieldWorkerDashboard = () => <div><h1 className="text-3xl font-bold text-gray-800">Field Worker Dashboard</h1><p className="mt-2 text-gray-600">Your assigned tasks coming here.</p></div>;
 
