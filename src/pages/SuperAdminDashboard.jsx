@@ -1,7 +1,10 @@
 import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { 
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, 
+  PieChart, Pie, Cell, LineChart, Line, CartesianGrid 
+} from 'recharts';
 import { Activity, CheckCircle, Clock } from 'lucide-react';
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
@@ -9,23 +12,29 @@ const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 const SuperAdminDashboard = () => {
   const { user } = useContext(AuthContext);
   const [data, setData] = useState(null);
+  const [trends, setTrends] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchAnalytics = async () => {
+    const fetchData = async () => {
       try {
-        const response = await api.get('/analytics/super-admin');
-        setData(response.data.data);
+        // Fetch stats and trends in parallel
+        const [statsRes, trendsRes] = await Promise.all([
+          api.get('/analytics/super-admin'),
+          api.get('/analytics/trends')
+        ]);
+        setData(statsRes.data.data);
+        setTrends(trendsRes.data.data);
       } catch (error) {
         console.error('Error fetching analytics:', error);
       } finally {
         setLoading(false);
       }
     };
-    fetchAnalytics();
+    fetchData();
   }, []);
 
-  if (loading) return <div className="text-center mt-20 text-gray-500 text-lg">Loading city data...</div>;
+  if (loading) return <div className="text-center mt-20 text-gray-500">Loading city data...</div>;
   if (!data) return <div className="text-center mt-20 text-red-500">Failed to load data.</div>;
 
   return (
@@ -64,12 +73,30 @@ const SuperAdminDashboard = () => {
         </div>
       </div>
 
-      {/* Charts */}
+      {/* NEW: Trends Chart (Full Width) */}
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
+        <h2 className="text-lg font-bold text-gray-800 mb-4">7-Day Complaint Trends</h2>
+        <div className="h-72">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={trends}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+              <XAxis dataKey="date" tick={{fill: '#6b7280'}} tickLine={false} axisLine={false} />
+              <YAxis tick={{fill: '#6b7280'}} tickLine={false} axisLine={false} />
+              <Tooltip 
+                contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+              />
+              <Line type="monotone" dataKey="complaints" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4, fill: '#3b82f6' }} activeDot={{ r: 6 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Bar Chart - Status */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <h2 className="text-lg font-bold text-gray-800 mb-4">Complaints by Status</h2>
-          <div className="h-72">
+          <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data.statusStats.map(s => ({ name: s._id, count: s.count }))}>
                 <XAxis dataKey="name" />
@@ -84,7 +111,7 @@ const SuperAdminDashboard = () => {
         {/* Pie Chart - Category */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <h2 className="text-lg font-bold text-gray-800 mb-4">Complaints by Category</h2>
-          <div className="h-72">
+          <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -92,7 +119,7 @@ const SuperAdminDashboard = () => {
                   cx="50%"
                   cy="50%"
                   innerRadius={60}
-                  outerRadius={100}
+                  outerRadius={90}
                   paddingAngle={5}
                   dataKey="value"
                 >
