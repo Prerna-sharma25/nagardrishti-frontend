@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute';
 import DashboardLayout from './components/DashboardLayout';
 import SuperAdminComplaints from './pages/SuperAdminComplaints';
+import SuperAdminUsers from './pages/SuperAdminUsers';
 
 
 // Placeholder dashboards
@@ -25,7 +26,9 @@ function App() {
             <Route path="/super-admin" element={<SuperAdminDashboard />} />
 
             <Route path="/super-admin/complaints" element={<SuperAdminComplaints />} />
-            
+
+            <Route path="/super-admin/users" element={<SuperAdminUsers />} />
+
           </Route>
         </Route>
 
