@@ -1,12 +1,15 @@
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
+import DeptAdminDashboard from './pages/DeptAdminDashboard';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute';
 import DashboardLayout from './components/DashboardLayout';
+import SuperAdminComplaints from './pages/SuperAdminComplaints';
+
 
 // Placeholder dashboards
 
-const DeptAdminDashboard = () => <div><h1 className="text-3xl font-bold text-gray-800">Dept Admin Dashboard</h1><p className="mt-2 text-gray-600">Department tasks coming here.</p></div>;
+
 const FieldWorkerDashboard = () => <div><h1 className="text-3xl font-bold text-gray-800">Field Worker Dashboard</h1><p className="mt-2 text-gray-600">Your assigned tasks coming here.</p></div>;
 
 function App() {
@@ -20,6 +23,9 @@ function App() {
         <Route element={<ProtectedRoute allowedRoles={['super_admin']} />}>
           <Route element={<DashboardLayout />}>
             <Route path="/super-admin" element={<SuperAdminDashboard />} />
+
+            <Route path="/super-admin/complaints" element={<SuperAdminComplaints />} />
+            
           </Route>
         </Route>
 
