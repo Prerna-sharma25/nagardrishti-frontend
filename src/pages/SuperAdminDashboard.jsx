@@ -8,6 +8,26 @@ import {
 import { Activity, CheckCircle, Clock, AlertTriangle, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+// Helper to format last 7 days
+const getLast7Days = (backendData) => {
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().split('T')[0]; // YYYY-MM-DD
+    
+    // Find if backend has data for this date
+    const existingData = backendData.find(item => item.date === dateStr || item._id === dateStr);
+    
+    days.push({
+      date: dateStr,
+      complaints: existingData ? existingData.count || existingData.complaints : 0
+    });
+  }
+  return days;
+};
+
+
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
 const SuperAdminDashboard = () => {
@@ -27,7 +47,7 @@ const SuperAdminDashboard = () => {
         ]);
         
         setData(statsRes.data.data);
-        setTrends(trendsRes.data.data);
+        setTrends(getLast7Days(trendsRes.data.data));
         
         // Take top 5 recent for feed
         const recent = complaintsRes.data.data
