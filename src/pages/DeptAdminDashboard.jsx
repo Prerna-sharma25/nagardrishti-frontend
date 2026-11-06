@@ -1,20 +1,15 @@
 import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
-import { 
-  Search, MapPin, Eye, X, UserPlus, CheckCircle, 
-  AlertTriangle, Activity 
-} from 'lucide-react';
+import { Search, MapPin, Eye, X, UserPlus, CheckCircle, AlertTriangle } from 'lucide-react';
 
 const DeptAdminDashboard = () => {
   const { user } = useContext(AuthContext);
   
-  // Data States
   const [complaints, setComplaints] = useState([]);
   const [fieldTeam, setFieldTeam] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // UI States
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedComplaint, setSelectedComplaint] = useState(null);
@@ -47,7 +42,6 @@ const DeptAdminDashboard = () => {
     fetchFieldTeam();
   }, []);
 
-  // Action Handlers
   const handleAssign = async (workerId) => {
     setActionLoading(true);
     try {
@@ -113,28 +107,28 @@ const DeptAdminDashboard = () => {
 
   return (
     <div className="max-w-7xl mx-auto pb-10">
-      {/* Header & Stats */}
-      <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-800 capitalize">{user?.department} Department</h1>
-          <p className="text-slate-500 mt-1">Manage and track civic issues</p>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-slate-800 capitalize">{user?.department} Department</h1>
+        <p className="text-slate-500 mt-1">Manage and track civic issues</p>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-100 border-l-4 border-l-blue-500">
+          <p className="text-xs text-slate-500 font-semibold uppercase mb-1">Total Active</p>
+          <h3 className="text-2xl font-bold text-slate-800">{complaints.length}</h3>
         </div>
-        
-        <div className="flex gap-4">
-          <div className="bg-white px-5 py-3 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
-            <div className="p-2 bg-blue-100 text-blue-600 rounded-lg"><Activity size={20} /></div>
-            <div>
-              <p className="text-xs text-slate-500 font-semibold uppercase">Active Tasks</p>
-              <p className="text-xl font-bold text-slate-800">{complaints.length}</p>
-            </div>
-          </div>
-          <div className="bg-white px-5 py-3 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
-            <div className="p-2 bg-red-100 text-red-600 rounded-lg"><AlertTriangle size={20} /></div>
-            <div>
-              <p className="text-xs text-slate-500 font-semibold uppercase">High Priority</p>
-              <p className="text-xl font-bold text-slate-800">{complaints.filter(c => c.priority >= 4).length}</p>
-            </div>
-          </div>
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-100 border-l-4 border-l-orange-500">
+          <p className="text-xs text-slate-500 font-semibold uppercase mb-1">Needs Assignment</p>
+          <h3 className="text-2xl font-bold text-slate-800">{complaints.filter(c => c.status === 'verified').length}</h3>
+        </div>
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-100 border-l-4 border-l-yellow-500">
+          <p className="text-xs text-slate-500 font-semibold uppercase mb-1">Work In Progress</p>
+          <h3 className="text-2xl font-bold text-slate-800">{complaints.filter(c => c.status === 'in_progress' || c.status === 'assigned').length}</h3>
+        </div>
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-100 border-l-4 border-l-green-500">
+          <p className="text-xs text-slate-500 font-semibold uppercase mb-1">Needs Approval</p>
+          <h3 className="text-2xl font-bold text-slate-800">{complaints.filter(c => c.status === 'resolved').length}</h3>
         </div>
       </div>
 
@@ -201,11 +195,9 @@ const DeptAdminDashboard = () => {
                   </span>
                 </td>
                 <td className="p-4 text-center">
-                  <div className="flex flex-col items-center">
-                    <span className={`text-lg font-bold ${c.priority >= 4 ? 'text-red-600' : 'text-slate-700'}`}>
-                      {c.priority}
-                    </span>
-                  </div>
+                  <span className={`text-lg font-bold ${c.priority >= 4 ? 'text-red-600' : 'text-slate-700'}`}>
+                    {c.priority}
+                  </span>
                 </td>
                 <td className="p-4 text-right">
                   <button 
@@ -251,18 +243,6 @@ const DeptAdminDashboard = () => {
                   <p className="text-sm text-slate-500 mb-2">Citizen Reported Image</p>
                   <img src={selectedComplaint.imageUrl} alt="Reported" className="w-full h-64 object-cover rounded-xl border border-slate-200 shadow-sm" />
                 </div>
-                {selectedComplaint.afterImage && (
-                  <div className="grid grid-cols-2 gap-2 mt-4">
-                    <div>
-                      <p className="text-xs text-slate-500 mb-1">Field Before</p>
-                      <img src={selectedComplaint.beforeImage} alt="Before" className="w-full h-24 object-cover rounded-lg border border-slate-200" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-500 mb-1">Field After</p>
-                      <img src={selectedComplaint.afterImage} alt="After" className="w-full h-24 object-cover rounded-lg border border-green-500 shadow-sm" />
-                    </div>
-                  </div>
-                )}
               </div>
 
               <div className="space-y-6">
@@ -285,6 +265,7 @@ const DeptAdminDashboard = () => {
                       <p className="font-bold text-slate-700">{selectedComplaint.priority}/5</p>
                     </div>
                   </div>
+                  
                   {selectedComplaint.workNote && (
                     <div className="mt-2 bg-green-50 p-3 rounded-lg border border-green-200">
                       <p className="text-xs text-green-700 font-semibold">Field Team Note:</p>

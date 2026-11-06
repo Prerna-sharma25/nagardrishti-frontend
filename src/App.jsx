@@ -6,12 +6,13 @@ import ProtectedRoute from './components/ProtectedRoute';
 import DashboardLayout from './components/DashboardLayout';
 import SuperAdminComplaints from './pages/SuperAdminComplaints';
 import SuperAdminUsers from './pages/SuperAdminUsers';
+import FieldWorkerDashboard from './pages/FieldWorkerDashboard';
 
 
 // Placeholder dashboards
 
 
-const FieldWorkerDashboard = () => <div><h1 className="text-3xl font-bold text-gray-800">Field Worker Dashboard</h1><p className="mt-2 text-gray-600">Your assigned tasks coming here.</p></div>;
+
 
 function App() {
   return (
