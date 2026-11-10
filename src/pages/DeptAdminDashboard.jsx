@@ -3,7 +3,7 @@ import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
 import { 
   Search, MapPin, Eye, X, UserPlus, CheckCircle, 
-  AlertTriangle, Activity 
+  AlertTriangle 
 } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -107,7 +107,6 @@ const DeptAdminDashboard = () => {
     return matchesSearch && matchesStatus;
   });
 
-  // UPDATED: Added 'closed' color
   const getStatusColor = (status) => {
     switch(status) {
       case 'verified': return 'bg-blue-100 text-blue-700 border-blue-200';
@@ -153,7 +152,7 @@ const DeptAdminDashboard = () => {
         </div>
       </div>
 
-      {/* Filters Bar - UPDATED with 'Closed' option */}
+      {/* Filters Bar */}
       <div className="bg-white p-4 rounded-t-xl border border-slate-200 flex flex-col md:flex-row gap-4 justify-between items-center">
         <div className="relative w-full md:w-96">
           <Search className="absolute left-3 top-2.5 text-slate-400" size={20} />
@@ -255,7 +254,7 @@ const DeptAdminDashboard = () => {
         </table>
       </div>
 
-      {/* Map Section - ONLY Renders when NO modals are open */}
+      {/* Map Section */}
       {!isDetailsModalOpen && !isAssignModalOpen && (
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
           <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
@@ -302,18 +301,44 @@ const DeptAdminDashboard = () => {
                   <p className="text-sm text-slate-500 mb-2">Citizen Reported Image</p>
                   <img src={selectedComplaint.imageUrl} alt="Reported" className="w-full h-64 object-cover rounded-xl border border-slate-200 shadow-sm" />
                 </div>
-                {selectedComplaint.afterImage && (
-                  <div className="grid grid-cols-2 gap-2 mt-4">
-                    <div>
-                      <p className="text-xs text-slate-500 mb-1">Field Before</p>
-                      <img src={selectedComplaint.beforeImage} alt="Before" className="w-full h-24 object-cover rounded-lg border border-slate-200" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-500 mb-1">Field After</p>
-                      <img src={selectedComplaint.afterImage} alt="After" className="w-full h-24 object-cover rounded-lg border border-green-500 shadow-sm" />
+                
+                {/* Smart Image Fallback Logic */}
+                <div className="grid grid-cols-2 gap-2 mt-4">
+                  <div>
+                    <p className="text-xs text-slate-500 mb-1">Field Before</p>
+                    {selectedComplaint.beforeImage && selectedComplaint.beforeImage.trim() !== '' ? (
+                      <img 
+                        src={selectedComplaint.beforeImage} 
+                        alt="Before" 
+                        className="w-full h-24 object-cover rounded-lg border border-slate-200" 
+                        onError={(e) => { 
+                          e.target.style.display = 'none'; 
+                          e.target.nextSibling.style.display = 'flex'; 
+                        }}
+                      />
+                    ) : null}
+                    <div className={`w-full h-24 bg-slate-100 rounded-lg border border-slate-300 items-center justify-center text-xs text-slate-500 ${selectedComplaint.beforeImage && selectedComplaint.beforeImage.trim() !== '' ? 'hidden' : 'flex'}`}>
+                      No Before Image
                     </div>
                   </div>
-                )}
+                  <div>
+                    <p className="text-xs text-slate-500 mb-1">Field After</p>
+                    {selectedComplaint.afterImage && selectedComplaint.afterImage.trim() !== '' ? (
+                      <img 
+                        src={selectedComplaint.afterImage} 
+                        alt="After" 
+                        className="w-full h-24 object-cover rounded-lg border border-green-500 shadow-sm" 
+                        onError={(e) => { 
+                          e.target.style.display = 'none'; 
+                          e.target.nextSibling.style.display = 'flex'; 
+                        }}
+                      />
+                    ) : null}
+                    <div className={`w-full h-24 bg-slate-100 rounded-lg border border-slate-300 items-center justify-center text-xs text-slate-500 ${selectedComplaint.afterImage && selectedComplaint.afterImage.trim() !== '' ? 'hidden' : 'flex'}`}>
+                      No After Image
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div className="space-y-6">
