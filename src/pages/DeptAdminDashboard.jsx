@@ -1,7 +1,21 @@
 import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
-import { Search, MapPin, Eye, X, UserPlus, CheckCircle, AlertTriangle } from 'lucide-react';
+import { 
+  Search, MapPin, Eye, X, UserPlus, CheckCircle, 
+  AlertTriangle, Activity 
+} from 'lucide-react';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+// Fix for default Leaflet marker icons
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
 
 const DeptAdminDashboard = () => {
   const { user } = useContext(AuthContext);
@@ -103,32 +117,37 @@ const DeptAdminDashboard = () => {
     }
   };
 
+  const pendingAssign = complaints.filter(c => c.status === 'verified').length;
+  const inProgress = complaints.filter(c => c.status === 'in_progress' || c.status === 'assigned').length;
+  const resolvedPending = complaints.filter(c => c.status === 'resolved').length;
+
   if (loading) return <div className="text-center mt-20 text-gray-500">Loading Dashboard...</div>;
 
   return (
     <div className="max-w-7xl mx-auto pb-10">
+      {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-slate-800 capitalize">{user?.department} Department</h1>
         <p className="text-slate-500 mt-1">Manage and track civic issues</p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-100 border-l-4 border-l-blue-500">
           <p className="text-xs text-slate-500 font-semibold uppercase mb-1">Total Active</p>
           <h3 className="text-2xl font-bold text-slate-800">{complaints.length}</h3>
         </div>
         <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-100 border-l-4 border-l-orange-500">
           <p className="text-xs text-slate-500 font-semibold uppercase mb-1">Needs Assignment</p>
-          <h3 className="text-2xl font-bold text-slate-800">{complaints.filter(c => c.status === 'verified').length}</h3>
+          <h3 className="text-2xl font-bold text-slate-800">{pendingAssign}</h3>
         </div>
         <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-100 border-l-4 border-l-yellow-500">
           <p className="text-xs text-slate-500 font-semibold uppercase mb-1">Work In Progress</p>
-          <h3 className="text-2xl font-bold text-slate-800">{complaints.filter(c => c.status === 'in_progress' || c.status === 'assigned').length}</h3>
+          <h3 className="text-2xl font-bold text-slate-800">{inProgress}</h3>
         </div>
         <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-100 border-l-4 border-l-green-500">
           <p className="text-xs text-slate-500 font-semibold uppercase mb-1">Needs Approval</p>
-          <h3 className="text-2xl font-bold text-slate-800">{complaints.filter(c => c.status === 'resolved').length}</h3>
+          <h3 className="text-2xl font-bold text-slate-800">{resolvedPending}</h3>
         </div>
       </div>
 
@@ -160,7 +179,7 @@ const DeptAdminDashboard = () => {
       </div>
 
       {/* Data Table */}
-      <div className="bg-white border-x border-b border-slate-200 rounded-b-xl shadow-sm overflow-hidden">
+      <div className="bg-white border-x border-b border-slate-200 rounded-b-xl shadow-sm overflow-hidden mb-8">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 text-sm">
@@ -195,9 +214,11 @@ const DeptAdminDashboard = () => {
                   </span>
                 </td>
                 <td className="p-4 text-center">
-                  <span className={`text-lg font-bold ${c.priority >= 4 ? 'text-red-600' : 'text-slate-700'}`}>
-                    {c.priority}
-                  </span>
+                  <div className="flex flex-col items-center">
+                    <span className={`text-lg font-bold ${c.priority >= 4 ? 'text-red-600' : 'text-slate-700'}`}>
+                      {c.priority}
+                    </span>
+                  </div>
                 </td>
                 <td className="p-4 text-right">
                   <button 
@@ -219,6 +240,30 @@ const DeptAdminDashboard = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Map Section - ONLY Renders when NO modals are open */}
+      {!isDetailsModalOpen && !isAssignModalOpen && (
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+          <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <MapPin size={20} className="text-red-500"/> {user?.department} Complaints Map
+          </h2>
+          <div className="h-80 rounded-lg overflow-hidden border border-slate-200 z-0 relative">
+            <MapContainer center={[28.6139, 77.2090]} zoom={11} style={{ height: '100%', width: '100%' }}>
+              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+              {complaints.map((point, idx) => (
+                point.location && point.location.coordinates && (
+                  <Marker key={idx} position={[point.location.coordinates[1], point.location.coordinates[0]]}>
+                    <Popup>
+                      <strong className="capitalize">{point.aiAnalysis?.category}</strong><br/>
+                      Status: {point.status}
+                    </Popup>
+                  </Marker>
+                )
+              ))}
+            </MapContainer>
+          </div>
+        </div>
+      )}
 
       {/* --- DETAILS MODAL --- */}
       {isDetailsModalOpen && selectedComplaint && (
@@ -243,6 +288,18 @@ const DeptAdminDashboard = () => {
                   <p className="text-sm text-slate-500 mb-2">Citizen Reported Image</p>
                   <img src={selectedComplaint.imageUrl} alt="Reported" className="w-full h-64 object-cover rounded-xl border border-slate-200 shadow-sm" />
                 </div>
+                {selectedComplaint.afterImage && (
+                  <div className="grid grid-cols-2 gap-2 mt-4">
+                    <div>
+                      <p className="text-xs text-slate-500 mb-1">Field Before</p>
+                      <img src={selectedComplaint.beforeImage} alt="Before" className="w-full h-24 object-cover rounded-lg border border-slate-200" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500 mb-1">Field After</p>
+                      <img src={selectedComplaint.afterImage} alt="After" className="w-full h-24 object-cover rounded-lg border border-green-500 shadow-sm" />
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-6">
