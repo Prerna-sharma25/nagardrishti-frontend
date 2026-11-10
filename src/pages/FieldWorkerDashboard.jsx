@@ -7,6 +7,7 @@ const FieldWorkerDashboard = () => {
   const { user } = useContext(AuthContext);
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('active'); // 'active' or 'completed'
   
   // Modal States
   const [selectedTask, setSelectedTask] = useState(null);
@@ -49,7 +50,7 @@ const FieldWorkerDashboard = () => {
       setIsStartModalOpen(false);
       setBeforeImage(null);
       setSelectedTask(null);
-      fetchTasks(); // Refresh list
+      fetchTasks();
     } catch (error) {
       alert(error.response?.data?.message || 'Error starting work');
     } finally {
@@ -74,7 +75,7 @@ const FieldWorkerDashboard = () => {
       setAfterImage(null);
       setWorkNote('');
       setSelectedTask(null);
-      fetchTasks(); // Refresh list
+      fetchTasks();
     } catch (error) {
       alert(error.response?.data?.message || 'Error resolving work');
     } finally {
@@ -86,27 +87,55 @@ const FieldWorkerDashboard = () => {
     if (status === 'assigned') return 'bg-purple-100 text-purple-700 border-purple-200';
     if (status === 'in_progress') return 'bg-yellow-100 text-yellow-700 border-yellow-200';
     if (status === 'resolved') return 'bg-green-100 text-green-700 border-green-200';
+    if (status === 'closed') return 'bg-blue-100 text-blue-700 border-blue-200'; // For completed
     return 'bg-gray-100 text-gray-700';
   };
 
   if (loading) return <div className="text-center mt-20 text-gray-500">Loading tasks...</div>;
 
+  // Filter tasks based on the active tab
+  const activeTasks = tasks.filter(t => ['assigned', 'in_progress'].includes(t.status));
+  const completedTasks = tasks.filter(t => ['resolved', 'closed'].includes(t.status));
+  
+  // Decide which list to show
+  const displayedTasks = activeTab === 'active' ? activeTasks : completedTasks;
+
   return (
     <div className="max-w-4xl mx-auto pb-10">
-      <div className="mb-8">
+      <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-800">My Tasks</h1>
         <p className="text-slate-500 mt-1">Hello {user?.name}, here are your assigned tasks.</p>
       </div>
 
-      {tasks.length === 0 ? (
+      {/* TABS */}
+      <div className="flex gap-4 mb-6 border-b border-slate-200">
+        <button 
+          onClick={() => setActiveTab('active')}
+          className={`pb-3 px-4 font-bold text-sm transition-colors border-b-2 ${activeTab === 'active' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+        >
+          Active Tasks ({activeTasks.length})
+        </button>
+        <button 
+          onClick={() => setActiveTab('completed')}
+          className={`pb-3 px-4 font-bold text-sm transition-colors border-b-2 ${activeTab === 'completed' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+        >
+          Completed ({completedTasks.length})
+        </button>
+      </div>
+
+      {displayedTasks.length === 0 ? (
         <div className="bg-white p-10 rounded-xl shadow-sm border border-slate-100 text-center">
           <CheckCircle size={48} className="text-green-500 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-slate-800">You're all caught up!</h2>
-          <p className="text-slate-500 mt-2">No tasks are currently assigned to you.</p>
+          <h2 className="text-xl font-bold text-slate-800">
+            {activeTab === 'active' ? "You're all caught up!" : "No completed tasks yet."}
+          </h2>
+          <p className="text-slate-500 mt-2">
+            {activeTab === 'active' ? "No active tasks are currently assigned to you." : "Your resolved tasks will appear here once approved."}
+          </p>
         </div>
       ) : (
         <div className="grid gap-4">
-          {tasks.map((task) => (
+          {displayedTasks.map((task) => (
             <div key={task._id} className="bg-white p-5 rounded-xl shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               
               <div className="flex items-start gap-4">
@@ -124,7 +153,8 @@ const FieldWorkerDashboard = () => {
               </div>
 
               <div className="flex gap-2 w-full md:w-auto mt-2 md:mt-0">
-                {task.status === 'assigned' && (
+                {/* Active Tab Actions */}
+                {activeTab === 'active' && task.status === 'assigned' && (
                   <button 
                     onClick={() => { setSelectedTask(task); setIsStartModalOpen(true); }}
                     className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold flex items-center justify-center gap-2 transition-colors"
@@ -132,7 +162,7 @@ const FieldWorkerDashboard = () => {
                     <Play size={16} /> Start Work
                   </button>
                 )}
-                {task.status === 'in_progress' && (
+                {activeTab === 'active' && task.status === 'in_progress' && (
                   <button 
                     onClick={() => { setSelectedTask(task); setIsResolveModalOpen(true); }}
                     className="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold flex items-center justify-center gap-2 transition-colors"
@@ -140,10 +170,17 @@ const FieldWorkerDashboard = () => {
                     <CheckCircle size={16} /> Resolve
                   </button>
                 )}
-                {task.status === 'resolved' && (
-                  <div className="text-sm font-semibold text-green-600 bg-green-50 px-4 py-2 rounded-lg flex items-center gap-2 border border-green-200">
-                    <CheckCircle size={16} /> Waiting for Admin Approval
-                  </div>
+
+                {/* Completed Tab Actions */}
+                {activeTab === 'completed' && task.status === 'resolved' && (
+                   <div className="text-sm font-semibold text-yellow-600 bg-yellow-50 px-4 py-2 rounded-lg flex items-center gap-2 border border-yellow-200">
+                     Waiting for Admin Approval
+                   </div>
+                )}
+                {activeTab === 'completed' && task.status === 'closed' && (
+                   <div className="text-sm font-semibold text-green-600 bg-green-50 px-4 py-2 rounded-lg flex items-center gap-2 border border-green-200">
+                     <CheckCircle size={16} /> Officially Closed
+                   </div>
                 )}
               </div>
             </div>

@@ -107,12 +107,14 @@ const DeptAdminDashboard = () => {
     return matchesSearch && matchesStatus;
   });
 
+  // UPDATED: Added 'closed' color
   const getStatusColor = (status) => {
     switch(status) {
       case 'verified': return 'bg-blue-100 text-blue-700 border-blue-200';
       case 'assigned': return 'bg-purple-100 text-purple-700 border-purple-200';
       case 'in_progress': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
       case 'resolved': return 'bg-green-100 text-green-700 border-green-200';
+      case 'closed': return 'bg-slate-200 text-slate-700 border-slate-300';
       default: return 'bg-gray-100 text-gray-700 border-gray-200';
     }
   };
@@ -151,7 +153,7 @@ const DeptAdminDashboard = () => {
         </div>
       </div>
 
-      {/* Filters Bar */}
+      {/* Filters Bar - UPDATED with 'Closed' option */}
       <div className="bg-white p-4 rounded-t-xl border border-slate-200 flex flex-col md:flex-row gap-4 justify-between items-center">
         <div className="relative w-full md:w-96">
           <Search className="absolute left-3 top-2.5 text-slate-400" size={20} />
@@ -174,6 +176,7 @@ const DeptAdminDashboard = () => {
             <option value="assigned">Assigned</option>
             <option value="in_progress">In Progress</option>
             <option value="resolved">Needs Approval</option>
+            <option value="closed">Closed (History)</option>
           </select>
         </div>
       </div>
@@ -220,13 +223,24 @@ const DeptAdminDashboard = () => {
                     </span>
                   </div>
                 </td>
-                <td className="p-4 text-right">
+                <td className="p-4 text-right flex justify-end gap-2">
                   <button 
                     onClick={() => { setSelectedComplaint(c); setIsDetailsModalOpen(true); }}
                     className="text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 p-2 rounded-lg transition-colors"
+                    title="View Details"
                   >
                     <Eye size={20} />
                   </button>
+                  
+                  {c.status === 'resolved' && (
+                    <button 
+                      onClick={() => handleClose(c._id)}
+                      className="text-green-600 hover:text-green-800 bg-green-50 hover:bg-green-100 p-2 rounded-lg transition-colors"
+                      title="Approve & Close"
+                    >
+                      <CheckCircle size={20} />
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}
