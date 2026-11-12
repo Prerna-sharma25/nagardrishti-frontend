@@ -187,6 +187,26 @@ const SuperAdminDashboard = () => {
             </ResponsiveContainer>
           </div>
         </div>
+                {/* New: Department Workload Chart */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h2 className="text-lg font-bold text-gray-800 mb-4">Department Workload</h2>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart 
+                data={data.departmentStats.map(d => ({ name: d._id ? d._id.toUpperCase() : 'UNKNOWN', count: d.count }))} 
+                layout="vertical"
+              >
+                <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#e5e7eb" />
+                <XAxis type="number" hide />
+                <YAxis dataKey="name" type="category" tick={{fill: '#6b7280', fontSize: 12}} tickLine={false} axisLine={false} width={80} />
+                <Tooltip cursor={{fill: '#f3f4f6'}} contentStyle={{ borderRadius: '8px', border: 'none' }} />
+                <Bar dataKey="count" fill="#10b981" radius={[0, 4, 4, 0]} barSize={20} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+      
 
         {/* Recent Complaints Live Feed */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col">
@@ -212,6 +232,121 @@ const SuperAdminDashboard = () => {
             ))}
           </div>
         </div>
+
+                {/* NAYA: Real City Insights (Bina kisi jugaad ke) */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-bold text-gray-800">City Insights</h2>
+            <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded font-semibold border border-blue-100">Real Data</span>
+          </div>
+          
+          <div className="flex-1 flex flex-col justify-center space-y-4">
+            
+            {/* 1. Total Verified by AI */}
+            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-100">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-200 rounded-full text-blue-700"><CheckCircle size={18} /></div>
+                <div>
+                  <p className="text-sm font-semibold text-blue-900">AI Verified</p>
+                  <p className="text-xs text-blue-700">Complaints cleared by AI</p>
+                </div>
+              </div>
+              <span className="text-xl font-bold text-blue-800">
+                {data.statusStats.find(s => s._id === 'verified')?.count || 0}
+              </span>
+            </div>
+
+            {/* 2. Total Rejected by AI */}
+            <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-100">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-red-200 rounded-full text-red-700"><AlertTriangle size={18} /></div>
+                <div>
+                  <p className="text-sm font-semibold text-red-900">AI Rejected</p>
+                  <p className="text-xs text-red-700">Fake or duplicate reports</p>
+                </div>
+              </div>
+              <span className="text-xl font-bold text-red-800">
+                {data.statusStats.find(s => s._id === 'rejected')?.count || 0}
+              </span>
+            </div>
+
+            {/* 3. In Progress Work */}
+            <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg border border-yellow-100">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-yellow-200 rounded-full text-yellow-700"><Clock size={18} /></div>
+                <div>
+                  <p className="text-sm font-semibold text-yellow-900">Work in Progress</p>
+                  <p className="text-xs text-yellow-700">Assigned to field teams</p>
+                </div>
+              </div>
+              <span className="text-xl font-bold text-yellow-800">
+                {data.statusStats.find(s => s._id === 'assigned')?.count + data.statusStats.find(s => s._id === 'in_progress')?.count || 0}
+              </span>
+            </div>
+
+            {/* 4. Successful Closures */}
+            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-100">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-green-200 rounded-full text-green-700"><Activity size={18} /></div>
+                <div>
+                  <p className="text-sm font-semibold text-green-900">Successfully Closed</p>
+                  <p className="text-xs text-green-700">Verified & fixed by dept</p>
+                </div>
+              </div>
+              <span className="text-xl font-bold text-green-800">
+                {data.statusStats.find(s => s._id === 'closed')?.count || 0}
+              </span>
+            </div>
+
+          </div>
+        </div>
+
+                {/* NAYA: Live Activity Feed */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+              <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+              </span>
+              Live Activity Feed
+            </h2>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto pr-2 space-y-4">
+            {recentComplaints.slice(0, 4).map((c, idx) => (
+              <div key={idx} className="flex gap-3">
+                {/* Timeline line */}
+                <div className="flex flex-col items-center">
+                  <div className={`w-2.5 h-2.5 rounded-full mt-1.5 ${
+                    c.status === 'closed' ? 'bg-slate-400' :
+                    c.status === 'resolved' ? 'bg-green-500' :
+                    c.status === 'in_progress' ? 'bg-yellow-500' :
+                    'bg-blue-500'
+                  }`}></div>
+                  {idx !== 3 && <div className="w-0.5 h-full bg-gray-200 my-1"></div>}
+                </div>
+                
+                <div className="pb-4">
+                  <p className="text-sm text-gray-800">
+                    {c.status === 'closed' ? 'Complaint was closed by Admin.' : 
+                     c.status === 'resolved' ? 'Field team resolved a complaint.' : 
+                     c.status === 'in_progress' ? 'Work started on a complaint.' : 
+                     c.status === 'verified' ? 'New complaint verified by AI.' : 
+                     'New complaint was reported.'}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-0.5 capitalize">
+                    {c.aiAnalysis?.category?.replace('_', ' ')} • {c.address?.split(',')[0]}
+                  </p>
+                  <p className="text-[10px] text-gray-400 mt-1 font-semibold">
+                    {new Date(c.reportedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        
 
       </div>
     </div>

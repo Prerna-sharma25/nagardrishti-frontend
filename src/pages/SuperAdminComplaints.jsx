@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
-import { Search, Filter, MapPin, Eye, X, FileText, CheckCircle } from 'lucide-react';
+import { Search, Filter, MapPin, Eye, X } from 'lucide-react';
 
 const SuperAdminComplaints = () => {
   const [complaints, setComplaints] = useState([]);
@@ -16,7 +16,7 @@ const SuperAdminComplaints = () => {
     const fetchComplaints = async () => {
       try {
         const response = await api.get('/complaints');
-        setComplaints(response.data.data);
+        setComplaints(Array.isArray(response.data.data) ? response.data.data : []);
       } catch (error) {
         console.error('Error fetching complaints:', error);
       } finally {
@@ -27,8 +27,10 @@ const SuperAdminComplaints = () => {
   }, []);
 
   const filteredComplaints = complaints.filter(c => {
-    const matchesSearch = c.address.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          c.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const searchStr = searchTerm.toLowerCase();
+    const addressMatch = c.address ? c.address.toLowerCase().includes(searchStr) : false;
+    const descMatch = c.description ? c.description.toLowerCase().includes(searchStr) : false;
+    const matchesSearch = addressMatch || descMatch;
     const matchesStatus = statusFilter === 'all' || c.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -39,17 +41,29 @@ const SuperAdminComplaints = () => {
       case 'assigned': return 'bg-purple-100 text-purple-700 border-purple-200';
       case 'in_progress': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
       case 'resolved': return 'bg-green-100 text-green-700 border-green-200';
-      case 'closed': return 'bg-slate-100 text-slate-700 border-slate-200';
+      case 'closed': return 'bg-slate-200 text-slate-700 border-slate-300';
       case 'rejected': return 'bg-red-100 text-red-700 border-red-200';
       case 'duplicate': return 'bg-gray-100 text-gray-700 border-gray-200';
       default: return 'bg-gray-100 text-gray-700 border-gray-200';
     }
   };
 
+  // Helper to display worker name from populated object
+  const getWorkerDisplay = (assignedTo) => {
+    if (!assignedTo) return 'Not Assigned Yet';
+    if (typeof assignedTo === 'object' && assignedTo.name) {
+      return `${assignedTo.name} (${assignedTo.zone || 'Zone'})`;
+    }
+    if (typeof assignedTo === 'string') {
+      return `ID: ${assignedTo}`;
+    }
+    return 'Not Assigned Yet';
+  };
+
   if (loading) return <div className="text-center mt-20 text-gray-500">Loading all complaints...</div>;
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto pb-10">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-slate-800">City-Wide Complaints</h1>
         <p className="text-slate-500 mt-1">Monitor every issue reported across all departments</p>
@@ -109,7 +123,12 @@ const SuperAdminComplaints = () => {
                 </td>
                 <td className="p-4">
                   <div className="flex items-center gap-3">
-                    <img src={c.imageUrl} alt="issue" className="w-10 h-10 rounded-lg object-cover border border-slate-200" />
+                    <img 
+                      src={c.imageUrl || 'https://via.placeholder.com/100'} 
+                      alt="issue" 
+                      className="w-10 h-10 rounded-lg object-cover border border-slate-200" 
+                      onError={(e) => { e.target.src = 'https://via.placeholder.com/100'; }}
+                    />
                     <div>
                       <p className="font-bold text-slate-800 capitalize text-sm">
                         {c.aiAnalysis?.category?.replace('_', ' ') || 'Unknown'}
@@ -138,7 +157,7 @@ const SuperAdminComplaints = () => {
                 </td>
                 <td className="p-4 text-center">
                   <span className={`px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(c.status)} capitalize`}>
-                    {c.status.replace('_', ' ')}
+                    {c.status?.replace('_', ' ') || 'Unknown'}
                   </span>
                 </td>
                 <td className="p-4 text-center">
@@ -152,26 +171,18 @@ const SuperAdminComplaints = () => {
                 </td>
               </tr>
             ))}
-            {filteredComplaints.length === 0 && (
-              <tr>
-                <td colSpan="7" className="p-8 text-center text-slate-500">
-                  No complaints found.
-                </td>
-              </tr>
-            )}
           </tbody>
         </table>
       </div>
 
-      {/* --- COMPLAINT DETAILS MODAL --- */}
+      {/* --- COMPLAINT DETAILS MODAL (READ-ONLY) --- */}
       {isModalOpen && selectedComplaint && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
-            
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
             <div className="flex justify-between items-center p-6 border-b border-slate-100 bg-slate-50">
               <div>
                 <h2 className="text-2xl font-bold text-slate-800 capitalize">
-                  {selectedComplaint.aiAnalysis?.category?.replace('_', ' ')} Issue
+                  {selectedComplaint.aiAnalysis?.category?.replace('_', ' ') || 'Issue'} Details
                 </h2>
                 <p className="text-sm text-slate-500 font-mono mt-1">ID: {selectedComplaint._id}</p>
               </div>
@@ -184,36 +195,46 @@ const SuperAdminComplaints = () => {
               {/* Left Side - Images */}
               <div className="space-y-4">
                 <h3 className="font-semibold text-slate-700 border-b pb-2">Visual Proof</h3>
-                
                 <div>
                   <p className="text-sm text-slate-500 mb-2">Citizen Reported Image</p>
-                  <img src={selectedComplaint.imageUrl} alt="Reported" className="w-full h-56 object-cover rounded-xl border border-slate-200 shadow-sm" />
+                  <img 
+                    src={selectedComplaint.imageUrl || 'https://via.placeholder.com/400'} 
+                    alt="Reported" 
+                    className="w-full h-56 object-cover rounded-xl border border-slate-200 shadow-sm" 
+                    onError={(e) => { e.target.src = 'https://via.placeholder.com/400'; }}
+                  />
                 </div>
 
-                {selectedComplaint.afterImage && (
-                  <div className="grid grid-cols-2 gap-2 mt-4">
-                    <div>
-                      <p className="text-xs text-slate-500 mb-1">Field Before</p>
-                      <img src={selectedComplaint.beforeImage} alt="Before" className="w-full h-24 object-cover rounded-lg border border-slate-200" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-500 mb-1">Field After</p>
-                      <img src={selectedComplaint.afterImage} alt="After" className="w-full h-24 object-cover rounded-lg border border-green-500 shadow-sm" />
-                    </div>
+                <div className="grid grid-cols-2 gap-2 mt-4">
+                  <div>
+                    <p className="text-xs text-slate-500 mb-1">Field Before</p>
+                    {selectedComplaint.beforeImage ? (
+                      <img src={selectedComplaint.beforeImage} alt="Before" className="w-full h-24 object-cover rounded-lg border border-slate-200" onError={(e) => { e.target.src = 'https://via.placeholder.com/100'; }} />
+                    ) : (
+                      <div className="w-full h-24 bg-slate-100 rounded-lg border border-slate-300 flex items-center justify-center text-xs text-slate-500">No Image</div>
+                    )}
                   </div>
-                )}
+                  <div>
+                    <p className="text-xs text-slate-500 mb-1">Field After</p>
+                    {selectedComplaint.afterImage ? (
+                      <img src={selectedComplaint.afterImage} alt="After" className="w-full h-24 object-cover rounded-lg border border-green-500 shadow-sm" onError={(e) => { e.target.src = 'https://via.placeholder.com/100'; }} />
+                    ) : (
+                      <div className="w-full h-24 bg-slate-100 rounded-lg border border-slate-300 flex items-center justify-center text-xs text-slate-500">No Image</div>
+                    )}
+                  </div>
+                </div>
               </div>
 
               {/* Right Side - Details */}
               <div className="space-y-6">
                 <div>
                   <h3 className="font-semibold text-slate-700 border-b pb-2 mb-3">Citizen Details</h3>
-                  <p className="text-sm"><span className="text-slate-500">Name:</span> {selectedComplaint.citizenName}</p>
-                  <p className="text-sm"><span className="text-slate-500">Phone:</span> {selectedComplaint.citizenPhone}</p>
-                  <p className="text-sm"><span className="text-slate-500">Address:</span> {selectedComplaint.address}</p>
+                  <p className="text-sm"><span className="text-slate-500">Name:</span> {selectedComplaint.citizenName || 'N/A'}</p>
+                  <p className="text-sm"><span className="text-slate-500">Phone:</span> {selectedComplaint.citizenPhone || 'N/A'}</p>
+                  <p className="text-sm"><span className="text-slate-500">Address:</span> {selectedComplaint.address || 'N/A'}</p>
                 </div>
 
-                                <div>
+                <div>
                   <h3 className="font-semibold text-slate-700 border-b pb-2 mb-3">AI Analysis</h3>
                   <div className="flex gap-4 mb-2">
                     <div className="bg-blue-50 p-3 rounded-lg flex-1 text-center border border-blue-100">
@@ -225,9 +246,14 @@ const SuperAdminComplaints = () => {
                       <p className="font-bold text-slate-700">{selectedComplaint.aiAnalysis?.confidence ? (selectedComplaint.aiAnalysis.confidence * 100).toFixed(0) + '%' : 'N/A'}</p>
                     </div>
                   </div>
+                  {selectedComplaint.workNote && (
+                    <div className="mt-4 bg-green-50 p-3 rounded-lg border border-green-200">
+                      <p className="text-xs text-green-700 font-semibold">Field Team Note:</p>
+                      <p className="text-sm text-green-800">{selectedComplaint.workNote}</p>
+                    </div>
+                  )}
                 </div>
 
-                {/* NEW: Assignment Details Section */}
                 <div>
                   <h3 className="font-semibold text-slate-700 border-b pb-2 mb-3">Assignment Details</h3>
                   <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-2">
@@ -238,42 +264,37 @@ const SuperAdminComplaints = () => {
                     <p className="text-sm">
                       <span className="text-slate-500 font-medium">Assigned Worker:</span>{' '}
                       <span className="font-bold text-slate-800">
-                        {selectedComplaint.assignedTo ? (
-                          <span className="text-blue-600">{selectedComplaint.assignedTo.name} ({selectedComplaint.assignedTo.zone})</span>
-                        ) : (
-                          <span className="text-orange-500">Not Assigned Yet</span>
-                        )}
+                        {getWorkerDisplay(selectedComplaint.assignedTo)}
                       </span>
                     </p>
                   </div>
-                  {selectedComplaint.workNote && (
-                    <div className="mt-4 bg-green-50 p-3 rounded-lg border border-green-200">
-                      <p className="text-xs text-green-700 font-semibold">Field Team Work Note:</p>
-                      <p className="text-sm text-green-800">{selectedComplaint.workNote}</p>
-                    </div>
-                  )}
                 </div>
 
                 <div>
                   <h3 className="font-semibold text-slate-700 border-b pb-2 mb-3">Timeline</h3>
                   <div className="space-y-3 relative before:absolute before:inset-0 before:ml-2 before:-translate-x-px before:h-full before:w-0.5 before:bg-slate-200">
-                    {selectedComplaint.statusHistory?.map((history, idx) => (
-                      <div key={idx} className="relative flex items-center gap-4">
-                        <div className="w-4 h-4 rounded-full bg-blue-500 border-4 border-white shadow shrink-0 z-10"></div>
-                        <div>
-                          <p className="text-sm font-semibold text-slate-700 capitalize">{history.status.replace('_', ' ')}</p>
-                          <p className="text-xs text-slate-500">{new Date(history.timestamp).toLocaleString()}</p>
+                    {selectedComplaint.statusHistory && selectedComplaint.statusHistory.length > 0 ? (
+                      selectedComplaint.statusHistory.map((history, idx) => (
+                        <div key={idx} className="relative flex items-center gap-4">
+                          <div className="w-4 h-4 rounded-full bg-blue-500 border-4 border-white shadow shrink-0 z-10"></div>
+                          <div>
+                            <p className="text-sm font-semibold text-slate-700 capitalize">{history.status?.replace('_', ' ') || 'Update'}</p>
+                            <p className="text-xs text-slate-500">{history.timestamp ? new Date(history.timestamp).toLocaleString() : 'N/A'}</p>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))
+                    ) : (
+                      <p className="text-sm text-slate-500 italic">No timeline available.</p>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
             
+            {/* MODAL FOOTER: ONLY CLOSE MODAL BUTTON */}
             <div className="p-4 border-t border-slate-100 bg-slate-50 text-right">
                <button onClick={() => setIsModalOpen(false)} className="bg-slate-800 text-white px-6 py-2 rounded-lg font-semibold hover:bg-slate-900 transition-colors">
-                  Close
+                  Close Window
                </button>
             </div>
 
