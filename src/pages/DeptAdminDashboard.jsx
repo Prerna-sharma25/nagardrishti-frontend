@@ -1,7 +1,8 @@
 import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
-import { Search, MapPin, Eye, X, UserPlus, CheckCircle } from 'lucide-react';
+import { Search, MapPin, Eye, X, UserPlus, CheckCircle, Users } from 'lucide-react';
+import { Link } from 'react-router-dom'; // ✅ IMPORT ADD KIYA
 
 const DeptAdminDashboard = () => {
   const { user } = useContext(AuthContext);
@@ -111,9 +112,15 @@ const DeptAdminDashboard = () => {
 
   return (
     <div className="max-w-7xl mx-auto pb-10">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-800 capitalize">{user?.department || 'Department'} Dashboard</h1>
-        <p className="text-slate-500 mt-1">Manage and track civic issues</p>
+      {/* Header with View Field Team Button */}
+      <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-800 capitalize">{user?.department || 'Department'} Dashboard</h1>
+          <p className="text-slate-500 mt-1">Manage and track civic issues</p>
+        </div>
+        <Link to="/dept-admin/field-team" className="bg-white border border-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-slate-50 transition-colors flex items-center gap-2 shadow-sm">
+          <Users size={16} /> View Field Team
+        </Link>
       </div>
 
       {/* Stats Cards */}

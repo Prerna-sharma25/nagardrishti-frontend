@@ -10,6 +10,7 @@ import SuperAdminUsers from './pages/SuperAdminUsers';
 
 // Dept Admin Pages
 import DeptAdminDashboard from './pages/DeptAdminDashboard';
+import DeptAdminFieldTeam from './pages/DeptAdminFieldTeam'; // ✅ NAYA IMPORT
 
 // Field Worker Pages
 import FieldWorkerDashboard from './pages/FieldWorkerDashboard';
@@ -34,6 +35,7 @@ function App() {
         <Route element={<ProtectedRoute allowedRoles={['dept_admin']} />}>
           <Route element={<DashboardLayout />}>
             <Route path="/dept-admin" element={<DeptAdminDashboard />} />
+            <Route path="/dept-admin/field-team" element={<DeptAdminFieldTeam />} /> {/* ✅ NAYA ROUTE */}
           </Route>
         </Route>
 
