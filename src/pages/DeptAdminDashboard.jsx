@@ -95,21 +95,15 @@ const DeptAdminDashboard = () => {
     }
   };
 
-  // Helper to get Worker Name instead of ID
   const getWorkerName = (assignedTo) => {
     if (!assignedTo) return 'Not Assigned Yet';
-    
-    // Agar backend se poori detail aa rahi hai (object)
     if (typeof assignedTo === 'object' && assignedTo.name) {
-      return `${assignedTo.name} ${assignedTo.zone ? `(${assignedTo.zone})` : ''}`;
+      return `${assignedTo.name} (${assignedTo.zone || 'Zone'})`;
     }
-    
-    // Agar sirf ID aa rahi hai (string), toh list mein dhundho
     if (typeof assignedTo === 'string') {
       const worker = fieldTeam.find(w => w._id === assignedTo);
       return worker ? `${worker.name} (${worker.zone})` : `ID: ${assignedTo}`;
     }
-    
     return 'Not Assigned Yet';
   };
 
@@ -117,7 +111,6 @@ const DeptAdminDashboard = () => {
 
   return (
     <div className="max-w-7xl mx-auto pb-10">
-      {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-slate-800 capitalize">{user?.department || 'Department'} Dashboard</h1>
         <p className="text-slate-500 mt-1">Manage and track civic issues</p>
@@ -188,7 +181,7 @@ const DeptAdminDashboard = () => {
               <tr key={c._id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors group">
                 <td className="p-4">
                   <div className="flex items-center gap-3">
-                    <img src={c.imageUrl || 'https://via.placeholder.com/100'} alt="issue" className="w-12 h-12 rounded-lg object-cover border border-slate-200" />
+                    <img src={c.imageUrl || 'https://via.placeholder.com/100'} alt="issue" className="w-12 h-12 rounded-lg object-cover border border-slate-200" onError={(e) => { e.target.src = 'https://via.placeholder.com/100'; }} />
                     <div>
                       <p className="font-bold text-slate-800 capitalize">{c.aiAnalysis?.category?.replace('_', ' ') || 'Issue'}</p>
                       <p className="text-sm text-slate-500 line-clamp-1">{c.description}</p>
@@ -251,12 +244,7 @@ const DeptAdminDashboard = () => {
                 <h3 className="font-semibold text-slate-700 border-b pb-2">Visual Proof</h3>
                 <div>
                   <p className="text-sm text-slate-500 mb-2">Citizen Reported Image</p>
-                  <img 
-                    src={selectedComplaint.imageUrl || 'https://via.placeholder.com/400'} 
-                    alt="Reported" 
-                    className="w-full h-64 object-cover rounded-xl border border-slate-200 shadow-sm" 
-                    onError={(e) => { e.target.src = 'https://via.placeholder.com/400'; }} 
-                  />
+                  <img src={selectedComplaint.imageUrl || 'https://via.placeholder.com/400'} alt="Reported" className="w-full h-64 object-cover rounded-xl border border-slate-200 shadow-sm" onError={(e) => { e.target.src = 'https://via.placeholder.com/400'; }} />
                 </div>
                 
                 <div className="grid grid-cols-2 gap-2 mt-4">
@@ -375,7 +363,7 @@ const DeptAdminDashboard = () => {
             <div className="p-6 space-y-3">
               {fieldTeam && fieldTeam.length > 0 ? (
                 fieldTeam.map((worker) => (
-                  <div key={worker._id} className="flex justify-between items-center p-4 border border-slate-200 rounded-xl">
+                  <div key={worker._id} className="flex justify-between items-center p-4 border border-slate-200 rounded-xl hover:border-blue-500 hover:shadow-sm transition-all">
                     <div>
                       <p className="font-bold text-slate-800">{worker.name}</p>
                       <p className="text-xs text-slate-500">{worker.zone}</p>
