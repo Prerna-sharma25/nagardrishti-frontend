@@ -198,7 +198,14 @@ const FieldWorkerDashboard = () => {
             </div>
             <form onSubmit={handleStartWork} className="p-6 space-y-4">
               <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:bg-slate-50 transition-colors relative">
-                <input type="file" required accept="image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={(e) => setBeforeImage(e.target.files[0])} />
+                <input 
+                  type="file" 
+                  required 
+                  accept="image/*" 
+                  capture="environment" // 👈 Ye add kiya hai (Mobile par direct camera khulega)
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                  onChange={(e) => setBeforeImage(e.target.files[0])} 
+                />
                 <Upload size={32} className="mx-auto text-slate-400 mb-2" />
                 <p className="text-sm font-semibold text-slate-700">{beforeImage ? beforeImage.name : 'Click to upload Before Photo'}</p>
               </div>
@@ -221,8 +228,14 @@ const FieldWorkerDashboard = () => {
             </div>
             <form onSubmit={handleResolve} className="p-6 space-y-4">
               <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:bg-slate-50 transition-colors relative">
-                <input type="file" required accept="image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={(e) => setAfterImage(e.target.files[0])} />
-                <ImageIcon size={32} className="mx-auto text-slate-400 mb-2" />
+                <input 
+                  type="file" 
+                  required 
+                  accept="image/*" 
+                  capture="environment" // 👈 Ye add kiya hai
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                  onChange={(e) => setAfterImage(e.target.files[0])} 
+                />
                 <p className="text-sm font-semibold text-slate-700">{afterImage ? afterImage.name : 'Click to upload After Photo'}</p>
               </div>
               <div>

@@ -172,7 +172,7 @@ const DeptAdminDashboard = () => {
       </div>
 
       {/* Data Table */}
-      <div className="bg-white border-x border-b border-slate-200 rounded-b-xl shadow-sm overflow-hidden mb-8">
+      <div className="bg-white border-x border-b border-slate-200 rounded-b-xl shadow-sm overflow-x-auto mb-8">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 text-sm">
