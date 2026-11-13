@@ -27,6 +27,7 @@ const SuperAdminComplaints = () => {
   }, []);
 
   const filteredComplaints = complaints.filter(c => {
+    if (c.status === 'rejected') return false; 
     const searchStr = searchTerm.toLowerCase();
     const addressMatch = c.address ? c.address.toLowerCase().includes(searchStr) : false;
     const descMatch = c.description ? c.description.toLowerCase().includes(searchStr) : false;
@@ -95,7 +96,6 @@ const SuperAdminComplaints = () => {
             <option value="in_progress">In Progress</option>
             <option value="resolved">Resolved</option>
             <option value="closed">Closed</option>
-            <option value="rejected">Rejected</option>
             <option value="duplicate">Duplicate</option>
           </select>
         </div>
