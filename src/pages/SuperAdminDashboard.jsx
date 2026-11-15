@@ -51,6 +51,7 @@ const SuperAdminDashboard = () => {
         
         // Take top 5 recent for feed
         const recent = complaintsRes.data.data
+          .filter(c => c.status !== 'rejected') 
           .sort((a, b) => new Date(b.reportedAt) - new Date(a.reportedAt))
           .slice(0, 5);
         setRecentComplaints(recent);
