@@ -293,7 +293,7 @@ const SuperAdminDashboard = () => {
         
         {/* Total Complaints */}
         <div className="group bg-white p-5 rounded-2xl border border-stone-200 shadow-sm hover:shadow-lg hover:border-teal-200 transition-all duration-300 relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-teal-400 to-teal-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-teal-400 to-teal-600 opacity-100 group-hover:opacity-100 transition-opacity"></div>
           <div className="flex justify-between items-start mb-3">
             <div className="p-2.5 bg-teal-50/80 text-teal-600 rounded-xl group-hover:scale-110 transition-transform">
               <Activity size={20} />
@@ -311,7 +311,7 @@ const SuperAdminDashboard = () => {
 
         {/* Open / Active */}
         <div className="group bg-white p-5 rounded-2xl border border-stone-200 shadow-sm hover:shadow-lg hover:border-amber-200 transition-all duration-300 relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-400 to-amber-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-400 to-amber-600 opacity-100 group-hover:opacity-100 transition-opacity"></div>
           <div className="flex justify-between items-start mb-3">
             <div className="p-2.5 bg-amber-50/80 text-amber-600 rounded-xl group-hover:scale-110 transition-transform">
               <AlertTriangle size={20} />
@@ -329,7 +329,7 @@ const SuperAdminDashboard = () => {
 
         {/* Resolved */}
         <div className="group bg-white p-5 rounded-2xl border border-stone-200 shadow-sm hover:shadow-lg hover:border-green-200 transition-all duration-300 relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-400 to-green-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-400 to-green-600 opacity-100 group-hover:opacity-100 transition-opacity"></div>
           <div className="flex justify-between items-start mb-3">
             <div className="p-2.5 bg-green-50/80 text-green-600 rounded-xl group-hover:scale-110 transition-transform">
               <CheckCircle size={20} />
@@ -347,7 +347,7 @@ const SuperAdminDashboard = () => {
 
         {/* Avg Time */}
         <div className="group bg-white p-5 rounded-2xl border border-stone-200 shadow-sm hover:shadow-lg hover:border-purple-200 transition-all duration-300 relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-400 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-400 to-purple-600 opacity-100 group-hover:opacity-100 transition-opacity"></div>
           <div className="flex justify-between items-start mb-3">
             <div className="p-2.5 bg-purple-50/80 text-purple-600 rounded-xl group-hover:scale-110 transition-transform">
               <Clock size={20} />
