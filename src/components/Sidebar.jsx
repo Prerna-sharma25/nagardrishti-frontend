@@ -18,7 +18,7 @@ const Sidebar = () => {
     { name: "Users", path: "/super-admin/users", icon: Users },
     { name: "Analytics", path: "/super-admin/analytics", icon: BarChart2 },
     { name: "Reports", path: "/super-admin/reports", icon: FileText },
-    { name: "Settings", path: "settings", icon: Settings },
+    { name: "Settings", path: "/super-admin/settings", icon: Settings },
   ];
 
   // 2. Department Admin Menu
@@ -26,7 +26,7 @@ const Sidebar = () => {
     { name: "Dashboard", path: "/dept-admin", icon: Home },
     { name: "Complaints", path: "/dept-admin/complaints", icon: List },
     { name: "Field Team", path: "/dept-admin/field-team", icon: HardHat },
-    { name: "Settings", path: "settings", icon: Settings },
+    { name: "Settings", path: "/dept-admin/settings", icon: Settings },
   ];
 
   const navItems = userRole === 'dept_admin' ? deptAdminNav : superAdminNav;

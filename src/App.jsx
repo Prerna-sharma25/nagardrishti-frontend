@@ -13,6 +13,7 @@ import SuperAdminReports from './pages/SuperAdminReports';
 
 // Dept Admin Pages
 import DeptAdminDashboard from './pages/DeptAdminDashboard';
+import DeptAdminAllComplaints from './pages/DeptAdminAllComplaints';
 import DeptAdminFieldTeam from './pages/DeptAdminFieldTeam'; 
 
 // Field Worker Pages
@@ -33,7 +34,7 @@ function App() {
             <Route path="/super-admin/users" element={<SuperAdminUsers />} />
             <Route path="/super-admin/analytics" element={<SuperAdminAnalytics />} />
             <Route path="/super-admin/reports" element={<SuperAdminReports />} />
-            <Route path="settings" element={<Settings />} />
+            <Route path="/super-admin/settings" element={<Settings />} />
           </Route>
         </Route>
 
@@ -41,8 +42,9 @@ function App() {
         <Route element={<ProtectedRoute allowedRoles={['dept_admin']} />}>
           <Route element={<DashboardLayout />}>
             <Route path="/dept-admin" element={<DeptAdminDashboard />} />
+            <Route path="/dept-admin/complaints" element={<DeptAdminAllComplaints />} />
             <Route path="/dept-admin/field-team" element={<DeptAdminFieldTeam />} /> 
-            <Route path="settings" element={<Settings />} />
+            <Route path="/dept-admin/settings" element={<Settings />} />
           </Route>
         </Route>
 
@@ -50,7 +52,7 @@ function App() {
         <Route element={<ProtectedRoute allowedRoles={['field_worker']} />}>
           <Route element={<DashboardLayout />}>
             <Route path="/field-worker" element={<FieldWorkerDashboard />} />
-            <Route path="settings" element={<Settings />} />
+            <Route path="/field-worker/settings" element={<Settings />} />
           </Route>
         </Route>
 
