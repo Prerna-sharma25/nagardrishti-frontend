@@ -27,7 +27,7 @@ const SuperAdminComplaints = () => {
   useEffect(() => {
     const fetchComplaints = async () => {
       try {
-        const response = await api.get('/complaints');
+        const response = await api.get('/complaints?limit=1000');
         setComplaints(Array.isArray(response.data.data) ? response.data.data : []);
       } catch (error) {
         console.error('Error fetching complaints:', error);
@@ -456,7 +456,7 @@ const SuperAdminComplaints = () => {
               </div>
               
               <div className="flex items-center gap-3 self-end sm:self-auto">
-                {/* Conditional Action Buttons */}
+                {/* Conditional Action Buttons
                 {!['rejected', 'closed', 'duplicate','resolved'].includes(selectedComplaint.status) && (
                   <>
                     <button 
@@ -472,7 +472,7 @@ const SuperAdminComplaints = () => {
                       Reject
                     </button>
                   </>
-                )}
+                )} */}
                 
                 {/* Green Cross Button */}
                 <button 

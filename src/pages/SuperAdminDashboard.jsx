@@ -20,7 +20,7 @@ const SuperAdminDashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const complaintsRes = await api.get('/complaints');
+        const complaintsRes = await api.get('/complaints?limit=1000');
         setAllComplaints(complaintsRes.data.data || []);
       } catch (error) {
         console.error('Error fetching complaints:', error);
@@ -119,12 +119,21 @@ const SuperAdminDashboard = () => {
   const openCount = currentComplaints.filter(c => ['pending', 'verified', 'assigned', 'in_progress'].includes(c.status)).length;
   const resolvedCount = currentComplaints.filter(c => ['closed', 'resolved'].includes(c.status)).length;
 
-  // Helper to calculate trend percentage
-  const calcTrend = (current, previous) => {
+    const calcTrend = (current, previous) => {
     if (previous === 0 && current === 0) return { label: '0%', isUp: true };
     if (previous === 0 && current > 0) return { label: 'New', isUp: true };
+    
     const diff = current - previous;
     const percent = Math.round((diff / previous) * 100);
+
+    // Agar percentage bohot zyada ho (jaise 1000%+), toh % ki jagah direct difference dikhao
+    if (Math.abs(percent) > 1000) {
+      return {
+        label: `${diff > 0 ? '+' : ''}${diff}`,
+        isUp: percent >= 0
+      };
+    }
+
     return {
       label: `${Math.abs(percent)}%`,
       isUp: percent >= 0
