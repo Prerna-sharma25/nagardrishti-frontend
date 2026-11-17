@@ -17,7 +17,8 @@ import DeptAdminAllComplaints from './pages/DeptAdminAllComplaints';
 import DeptAdminFieldTeam from './pages/DeptAdminFieldTeam'; 
 
 // Field Worker Pages
-import FieldWorkerDashboard from './pages/FieldWorkerDashboard';
+import FieldWorkerTasks from './pages/FieldWorkerTasks';
+import FieldWorkerHistory from './pages/FieldWorkerHistory';
 
 function App() {
   return (
@@ -51,7 +52,8 @@ function App() {
         {/* Field Worker Routes */}
         <Route element={<ProtectedRoute allowedRoles={['field_worker']} />}>
           <Route element={<DashboardLayout />}>
-            <Route path="/field-worker" element={<FieldWorkerDashboard />} />
+            <Route path="/field-worker" element={<FieldWorkerTasks />} />
+            <Route path="/field-worker/history" element={<FieldWorkerHistory />} />
             <Route path="/field-worker/settings" element={<Settings />} />
           </Route>
         </Route>

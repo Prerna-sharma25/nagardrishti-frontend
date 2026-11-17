@@ -1,13 +1,14 @@
 import { NavLink } from "react-router-dom";
 import { 
-  Home, List, Users, BarChart2, FileText, Settings, HardHat 
+  Home, List, Users, BarChart2, FileText, Settings, HardHat, 
+  ClipboardList, History
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import logoSidebar from "../assets/sidebarLogo.png"; 
 import sidebarCity from "../assets/sidebar_bottom.png"; 
 
 const Sidebar = () => {
-  const { user } = useAuth(); 
+  const { user } = useAuth();
   
   const userRole = user?.role || 'super_admin';
 
@@ -16,8 +17,8 @@ const Sidebar = () => {
     { name: "Dashboard", path: "/super-admin", icon: Home },
     { name: "Complaints", path: "/super-admin/complaints", icon: List },
     { name: "Users", path: "/super-admin/users", icon: Users },
-    { name: "Analytics", path: "/super-admin/analytics", icon: BarChart2 },
-    { name: "Reports", path: "/super-admin/reports", icon: FileText },
+    // { name: "Analytics", path: "/super-admin/analytics", icon: BarChart2 },
+    // { name: "Reports", path: "/super-admin/reports", icon: FileText },
     { name: "Settings", path: "/super-admin/settings", icon: Settings },
   ];
 
@@ -29,7 +30,17 @@ const Sidebar = () => {
     { name: "Settings", path: "/dept-admin/settings", icon: Settings },
   ];
 
-  const navItems = userRole === 'dept_admin' ? deptAdminNav : superAdminNav;
+  // 3. Field Worker Menu 
+  const fieldWorkerNav = [
+    { name: "My Tasks", path: "/field-worker", icon: ClipboardList },
+    { name: "Task History", path: "/field-worker/history", icon: History },
+    { name: "Settings", path: "/field-worker/settings", icon: Settings },
+  ];
+
+  // Role ke hisaab se select karein
+  let navItems = superAdminNav;
+  if (userRole === 'dept_admin') navItems = deptAdminNav;
+  else if (userRole === 'field_worker') navItems = fieldWorkerNav;
 
   return (
     <aside className="w-[260px] bg-[#0b5c55] text-white flex flex-col h-screen fixed left-0 top-0 z-30 overflow-hidden">
@@ -45,7 +56,7 @@ const Sidebar = () => {
           <NavLink
             key={item.name}
             to={item.path}
-            end={item.path === "/super-admin" || item.path === "/dept-admin"}
+            end={item.path === "/super-admin" || item.path === "/dept-admin" || item.path === "/field-worker"} 
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
                 isActive
@@ -76,7 +87,6 @@ const Sidebar = () => {
           </div>
         )}
       </div>
-
     </aside>
   );
 };
