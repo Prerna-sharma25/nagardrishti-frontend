@@ -20,8 +20,22 @@ const SuperAdminDashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const complaintsRes = await api.get('/complaints?limit=1000');
-        setAllComplaints(complaintsRes.data.data || []);
+        const [statsRes, trendsRes, complaintsRes] = await Promise.all([
+          api.get('/analytics/super-admin'),
+          api.get('/analytics/trends'),
+          api.get('/complaints')
+        ]);
+        
+        setData(statsRes.data.data);
+        setTrends(getLast7Days(trendsRes.data.data));
+        
+        // Take top 5 recent for feed
+        const recent = complaintsRes.data.data
+          .filter(c => c.status !== 'rejected') 
+          .sort((a, b) => new Date(b.reportedAt) - new Date(a.reportedAt))
+          .slice(0, 5);
+        setRecentComplaints(recent);
+
       } catch (error) {
         console.error('Error fetching complaints:', error);
       } finally {
